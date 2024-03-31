@@ -1,0 +1,5 @@
+{
+  "clangd.fallbackFlags": [
+    "-I ~/emsdk/upstream/emscripten/system/include/"
+  ]
+}

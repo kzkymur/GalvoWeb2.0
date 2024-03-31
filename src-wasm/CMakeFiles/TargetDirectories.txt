@@ -1,0 +1,3 @@
+/Users/yamaurakazuki/Lecture/M1/GalvoWeb2.0/src-wasm/CMakeFiles/index.dir
+/Users/yamaurakazuki/Lecture/M1/GalvoWeb2.0/src-wasm/CMakeFiles/edit_cache.dir
+/Users/yamaurakazuki/Lecture/M1/GalvoWeb2.0/src-wasm/CMakeFiles/rebuild_cache.dir
