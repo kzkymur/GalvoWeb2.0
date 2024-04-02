@@ -227,25 +227,26 @@ cv::Point2f undistortPoint(cv::Point2f p, cv::Mat cameraMat, cv::Mat  distCoeffs
   return dest.at<cv::Point2f>(0);
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE void* undistortPoint(int x, int y, void * cameraMat, void * distCoeffs) {
+EXTERN EMSCRIPTEN_KEEPALIVE void undistortPoint(int x, int y, void * cameraMat, void * distCoeffs, void * dest) {
   cv::Point2f p = cv::Point2f((float)x, (float)y);
   cv::Mat intr = readMat32F(cameraMat, 3, 3);
   cv::Mat dist = readMat32F(distCoeffs, 1, 8);
 
   cv::Point2f up = undistortPoint(p, intr, dist);
-  cv::Mat dest(1,1,CV_32FC2);
-  dest.at<cv::Point2f>(0) = up;
-  return writeMat(dest);
+  cv::Mat destMat(1,1,CV_32FC2);
+  destMat.at<cv::Point2f>(0) = up;
+  writeMat(destMat, dest);
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE void* calcHomography(void * galvoDots, void * cameraDos, int size) {
-  vector<cv::Point2f> camera = mat2VecPoint2f(readMat32F(cameraDos, 1, size));
-  vector<cv::Point2f> galvo = mat2VecPoint2f(readMat32F(galvoDots, 1, size));
+EXTERN EMSCRIPTEN_KEEPALIVE void calcHomography(void * galvoDots, void * cameraDos, int size, void* dest) {
+  vector<cv::Point2f> camera = mat2VecPoint2f(readMat32F(cameraDos, 2, size));
+  vector<cv::Point2f> galvo = mat2VecPoint2f(readMat32F(galvoDots, 2, size));
   cv::Mat h = cv::findHomography(camera, galvo, cv::FM_LMEDS);
-  return writeMat(h);
+  h.convertTo(h, CV_32F);
+  writeMat(h, dest);
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE void* Transform(int x, int y, void * homography, void * cameraMat, void * distCoeffs) {
+EXTERN EMSCRIPTEN_KEEPALIVE void Transform(int x, int y, void * homography, void * cameraMat, void * distCoeffs, void* dest) {
   cv::Point2f p = cv::Point2f((float)x, (float)y);
   cv::Mat h = readMat32F(homography, 3, 3);
   cv::Mat intr = readMat32F(cameraMat, 3, 3);
@@ -256,8 +257,8 @@ EXTERN EMSCRIPTEN_KEEPALIVE void* Transform(int x, int y, void * homography, voi
   cv::Mat result = h * upm;
 
   cv::Point3f resultPoint(result.at<float>(0), result.at<float>(1), result.at<float>(2));
-  cv::Mat dest(1,1,CV_32FC3);
-  dest.at<cv::Point3f>(0) = resultPoint;
+  cv::Mat destMat(1,1,CV_32FC3);
+  destMat.at<cv::Point3f>(0) = resultPoint;
 
-  return writeMat(dest);
+  writeMat(destMat, dest);
 }

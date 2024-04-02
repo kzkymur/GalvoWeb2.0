@@ -147,27 +147,29 @@ export default class ModuleWrapper {
     x: number,
     y: number,
     cameraMat: F32AP,
-    distCoeffs: F32AP
-  ): F32AP {
+    distCoeffs: F32AP,
+    dest: F32AP
+  ): null {
     return this.module.ccall(
       "undistortPoint",
-      "number",
-      ["number", "number", "number", "number"],
-      [x, y, cameraMat, distCoeffs]
-    ) as F32AP;
+      null,
+      ["number", "number", "number", "number", "number"],
+      [x, y, cameraMat, distCoeffs, dest]
+    );
   }
 
   public calcHomography(
-    galvoDots: I32AP,
-    cameraDots: U32AP,
-    size: number
-  ): U32AP {
+    galvoDots: F32AP,
+    cameraDots: F32AP,
+    size: number,
+    dest: F32AP
+  ): null {
     return this.module.ccall(
       "calcHomography",
-      "number",
-      ["number", "number", "number"],
-      [galvoDots, cameraDots, size]
-    ) as U32AP;
+      null,
+      ["number", "number", "number", "number"],
+      [galvoDots, cameraDots, size, dest]
+    );
   }
 
   public transform(
@@ -175,13 +177,14 @@ export default class ModuleWrapper {
     y: number,
     homography: F32AP,
     cameraMat: F32AP,
-    distCoeffs: F32AP
-  ): U32AP {
+    distCoeffs: F32AP,
+    dest: F32AP
+  ): null {
     return this.module.ccall(
       "transform",
-      "number",
-      ["number", "number", "number", "number", "number"],
-      [x, y, homography, cameraMat, distCoeffs]
-    ) as U32AP;
+      null,
+      ["number", "number", "number", "number", "number", "number"],
+      [x, y, homography, cameraMat, distCoeffs, dest]
+    );
   }
 }
