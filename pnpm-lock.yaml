@@ -17,9 +17,6 @@ dependencies:
   '@mui/styled-engine-sc':
     specifier: ^6.0.0-alpha.18
     version: 6.0.0-alpha.18(styled-components@6.1.8)
-  '@types/w3c-web-serial':
-    specifier: ^1.0.6
-    version: 1.0.6
   mathjs:
     specifier: ^12.4.1
     version: 12.4.1
@@ -67,6 +64,9 @@ devDependencies:
   '@types/react-router-dom':
     specifier: ^5.3.3
     version: 5.3.3
+  '@types/w3c-web-serial':
+    specifier: ^1.0.6
+    version: 1.0.6
   '@typescript-eslint/eslint-plugin':
     specifier: ^6.20.0
     version: 6.21.0(@typescript-eslint/parser@6.21.0)(eslint@8.57.0)(typescript@5.4.3)
@@ -829,7 +829,7 @@ packages:
 
   /@types/w3c-web-serial@1.0.6:
     resolution: {integrity: sha512-5IlDdQ2C56sCVwc7CUlqT9Axxw+0V/FbWRbErklYIzZ5mKL9s4l7epXHygn+4X7L2nmAPnVvRl55XUVo0760Rg==}
-    dev: false
+    dev: true
 
   /@types/ws@8.5.10:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
