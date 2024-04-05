@@ -3,7 +3,7 @@
 ## init
 
 ```
-git submodule init
+git submodule update --init
 python opencv/platforms/js/build_js.py opencv-build --build_wasm --emscripten_dir ~/emsdk/upstream/emscripten
 
 cd src-wasm
@@ -12,4 +12,3 @@ cd ..
 
 npm i
 ```
-

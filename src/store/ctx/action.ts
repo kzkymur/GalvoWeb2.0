@@ -1,5 +1,5 @@
 import Action, { ActionTypes } from "./actionTypes";
-import { CanvasId, GetCtx } from ".";
+import { CanvasId, GetCtx, SerialId, WriteSerialPort } from ".";
 
 export const SetWasmModule: (module: EmscriptenModule) => Action = (
   module
@@ -14,4 +14,12 @@ export const SetCtx: (canvasId: CanvasId, getCtx?: GetCtx) => Action = (
 ) => ({
   type: ActionTypes.setCtx,
   payload: { canvasId, getCtx },
+});
+
+export const SetSendMsgSp: (
+  serialId: SerialId,
+  writeSerialPort?: WriteSerialPort
+) => Action = (serialId, writeSerialPort) => ({
+  type: ActionTypes.setWriteSerialPort,
+  payload: { serialId, writeSerialPort },
 });

@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from "react";
-import { styled } from "@mui/material/styles";
 import {
   Resolution,
   resolution1080p,
@@ -10,13 +9,9 @@ import {
   resolutionVGA,
   resolutionXGA,
 } from "@/module/camera";
-import Box from "@mui/material/Box";
-import InputLabel from "@mui/material/InputLabel";
-import Item from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { CanvasId } from "@/store/ctx";
 import { useStore } from "@/module/useStore";
+import SelectBox from "./SelectBox";
 
 type Props = {
   id: CanvasId;
@@ -24,14 +19,16 @@ type Props = {
 
 const RESOLUTION_KEY = "RESOLUTION_KEY";
 
-export const useResolution = (targetCanvavsId: CanvasId): [Resolution, (v: Resolution) => void] => {
+export const useResolution = (
+  targetCanvavsId: CanvasId
+): [Resolution, (v: Resolution) => void] => {
   const [resolution, update] = useStore<Resolution>(
     RESOLUTION_KEY,
     targetCanvavsId,
     resolutionXGA
   );
   return [resolution || { w: 0, h: 0 }, update];
-}
+};
 
 const Catalog: Record<string, Resolution> = {
   "1920 x 1080": resolution1080p,
@@ -44,37 +41,25 @@ const Catalog: Record<string, Resolution> = {
 } as const;
 type Catalog = keyof typeof Catalog;
 
-const StyledSelect = styled(Select<string>)`
-  > div {
-    padding: 4px !important;
-    background: white;
-  }
-`;
-
 const ResolutionSelector: React.FC<Props> = (props) => {
   const [r, updateResolution] = useResolution(props.id);
-  const [resolutionName, setResolutionName] = useState<Catalog>(`${r.w} x ${r.h}`);
+  const [resolutionName, setResolutionName] = useState<Catalog>(
+    `${r.w} x ${r.h}`
+  );
   const onChange = useCallback(
-    (e: SelectChangeEvent) => {
-      setResolutionName(e.target.value);
-      updateResolution(Catalog[e.target.value]);
+    (v: string) => {
+      setResolutionName(v);
+      updateResolution(Catalog[v]);
     },
     [updateResolution, setResolutionName]
   );
   return (
-    <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
-        <InputLabel>Resolution</InputLabel>
-        <StyledSelect
-          value={resolutionName}
-          onChange={onChange}
-        >
-          {Object.keys(Catalog).map((c) => (
-            <Item value={c} key={c}>{c}</Item>
-          ))}
-        </StyledSelect>
-      </FormControl>
-    </Box>
+    <SelectBox
+      onChange={onChange}
+      values={Object.keys(Catalog)}
+      value={resolutionName}
+      label="resolution"
+    />
   );
 };
 

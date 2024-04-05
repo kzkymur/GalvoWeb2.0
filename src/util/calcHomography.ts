@@ -1,20 +1,33 @@
+import * as math from "mathjs";
 import ModuleWrapper from "@/wasm/wrapper";
 import { WMF32A } from "@/wasm/memory";
+import TeencyCommunicator from "@/module/teencyInterface";
 import { sleep } from ".";
 
-type Coordinate = {
+export const arrayToMatrix = (a: number[], column: number): number[][] => {
+  if (a.length % column !== 0) {
+    throw new Error("invalid args");
+  }
+  const m = [];
+  for (let i = 0; i < a.length / column; i++) {
+    m.push(a.slice(i * column, (i + 1) * column));
+  }
+  return m;
+};
+
+export type Coordinate = {
   x: number;
   y: number;
 };
 
-const GALVO_MIN_X = -65536;
 const GALVO_MAX_X = 65536;
-const GALVO_MIN_Y = -65536;
+const GALVO_MIN_X = 0;
 const GALVO_MAX_Y = 65536;
+const GALVO_MIN_Y = 0;
 
-export const checkData = (
-  arr_1: Uint8Array,
-  arr_2: Uint8Array,
+const detectWhitePixels = (
+  arr_1: Uint8ClampedArray,
+  arr_2: Uint8ClampedArray,
   colorThreshold: number
 ) => {
   const errors = [];
@@ -31,40 +44,63 @@ export const checkData = (
   return errors;
 };
 
-export const detectRedPoint = (
+// export const detectRedPoint = (
+//   arr_1: Uint8ClampedArray,
+//   arr_2: Uint8ClampedArray,
+//   colorThreshold: number
+// ) => {
+//   const errors = [];
+//   for (let i = 0, l = arr_1.length; i < l; i += 4) {
+//     if (arr_2[i] - arr_1[i] > colorThreshold) {
+//       errors.push(i);
+//     }
+//   }
+//   return errors;
+// };
+
+const detectLaserPoint = async (
   ctx: CanvasRenderingContext2D,
-  colorThreshold: number
-): [boolean, Coordinate] => {
-  const resolutionWidth = ctx.canvas.width;
-  const resolutionHeight = ctx.canvas.height;
-  const arr_1 = ctx.getImageData(0,0,resolutionWidth, resolutionHeight).data;
-  const arr_2 = ctx.getImageData(0,0,resolutionWidth, resolutionHeight).data;
-  const errs = checkData(arr_1, arr_2, colorThreshold);
-  if (errs.length === 0) return [false, { x: 0, y: 0 }];
-  const pErrs = errs.map((e) => ({
-    x: (e / 4) % resolutionWidth,
-    y: Math.floor(e / 4 / resolutionWidth),
-  }));
-  return [
-    true,
-    pErrs.reduce(
-      (a, c) => ({
-        x: a.x + c.x / errs.length,
-        y: a.y + c.y / errs.length,
-      }),
-      { x: 0, y: 0 }
-    ),
-  ];
+  colorThreshold: number,
+  fps: number,
+  timeout: number
+): Promise<[boolean, Coordinate]> => {
+  const { width, height } = ctx.canvas;
+  let preFrame = ctx.getImageData(0, 0, width, height).data;
+  const cycle = 1000 / fps / 2;
+  const start = performance.now();
+  for (let i = 0; performance.now() - start < timeout; i++) {
+    await sleep(cycle);
+    const currentFrame = ctx.getImageData(0, 0, width, height).data;
+    const errs = detectWhitePixels(preFrame, currentFrame, colorThreshold);
+    preFrame = currentFrame;
+    if (errs.length !== 0) {
+      const pErrs = errs.map((e) => ({
+        x: (e / 4) % width,
+        y: Math.floor(e / 4 / width),
+      }));
+      return [
+        true,
+        pErrs.reduce(
+          (a, c) => ({
+            x: a.x + c.x / errs.length,
+            y: a.y + c.y / errs.length,
+          }),
+          { x: 0, y: 0 }
+        ),
+      ];
+    }
+  }
+  return [false, { x: 0, y: 0 }];
 };
 
 export const calcHomography = async (
   module: EmscriptenModule,
   orgCtx: CanvasRenderingContext2D,
-  serial: any,
+  teency: TeencyCommunicator,
   nDots: number,
+  colorThreshold: number,
   duration: number
 ): Promise<WMF32A> => {
-  duration /= 2;
   const moduleWrapper = new ModuleWrapper(module);
   const dest = new WMF32A(module, 3 * 3);
   const galvoArray: number[] = [];
@@ -76,10 +112,16 @@ export const calcHomography = async (
     const x = Math.floor(dotsSpanX * i);
     for (let j = 0; j < nDots; j++) {
       await sleep(duration);
-      const y = Math.floor(dotsSpanY * i);
-      serial.shot(x, y);
-      await sleep(duration);
-      const [detect, camera] = detectRedPoint(orgCtx);
+      const y = Math.floor(dotsSpanY * j);
+      const detectResult = detectLaserPoint(
+        orgCtx,
+        colorThreshold,
+        30,
+        duration
+      );
+      teency.setGalvoPos({ x, y });
+      const [detect, camera] = await detectResult;
+      console.log(detect, camera);
       if (detect) {
         galvoArray.push(x, y);
         cameraArray.push(camera.x, camera.y);
@@ -87,15 +129,43 @@ export const calcHomography = async (
     }
   }
 
+  if (galvoArray.length < 4) return dest;
   const galvo = new WMF32A(module, galvoArray.length);
   galvo.data = new Float32Array(galvoArray);
   const camera = new WMF32A(module, galvoArray.length);
   camera.data = new Float32Array(cameraArray);
+  console.log(camera.data);
+  console.log(galvo.data);
   moduleWrapper.calcHomography(
     galvo.pointer,
     camera.pointer,
-    galvoArray.length,
+    galvoArray.length / 2,
     dest.pointer
   );
   return dest;
+};
+
+export const renderDots = (
+  ctx: CanvasRenderingContext2D,
+  invHomography: number[],
+  nDots: number
+) => {
+  const dotsSpanX = (GALVO_MAX_X - GALVO_MIN_X) / (nDots - 1);
+  const dotsSpanY = (GALVO_MAX_Y - GALVO_MIN_Y) / (nDots - 1);
+
+  for (let i = 0; i < nDots; i++) {
+    const x = Math.floor(dotsSpanX * i);
+    for (let j = 0; j < nDots; j++) {
+      const y = Math.floor(dotsSpanY * j);
+      const posArray = [x, y, 1];
+      const h = math.multiply(arrayToMatrix(invHomography, 3), posArray);
+      ctx.fillStyle = `rgba(${(j / nDots) * 255}, ${
+        (i / nDots) * 255
+      }, 255, 1)`;
+      ctx.beginPath();
+      ctx.arc(h[0] / h[2], h[1] / h[2], 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.closePath();
+    }
+  }
 };

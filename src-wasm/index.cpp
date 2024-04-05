@@ -238,9 +238,9 @@ EXTERN EMSCRIPTEN_KEEPALIVE void undistortPoint(int x, int y, void * cameraMat, 
   writeMat(destMat, dest);
 }
 
-EXTERN EMSCRIPTEN_KEEPALIVE void calcHomography(void * galvoDots, void * cameraDos, int size, void* dest) {
-  vector<cv::Point2f> camera = mat2VecPoint2f(readMat32F(cameraDos, 2, size));
-  vector<cv::Point2f> galvo = mat2VecPoint2f(readMat32F(galvoDots, 2, size));
+EXTERN EMSCRIPTEN_KEEPALIVE void calcHomography(void * galvoDots, void * cameraDos, int length, void* dest) {
+  vector<cv::Point2f> camera = mat2VecPoint2f(readMat32F(cameraDos, 2, length));
+  vector<cv::Point2f> galvo = mat2VecPoint2f(readMat32F(galvoDots, 2, length));
   cv::Mat h = cv::findHomography(camera, galvo, cv::FM_LMEDS);
   h.convertTo(h, CV_32F);
   writeMat(h, dest);
