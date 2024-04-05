@@ -6,9 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --hot",
     "prod": "webpack-dev-server  --mode=production",
-    "build": "webpack",
-    "make:wasm": "cd src-wasm; emcmake cmake; cd -;",
-    "build:wasm": "cd src-wasm; emmake make; cd -;"
+    "build": "webpack"
   },
   "author": "kzkymur",
   "license": "ISC",

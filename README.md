@@ -10,5 +10,21 @@ cd src-wasm
 emcmake cmake
 cd ..
 
-npm i
+pnpm i
+```
+
+Maybe you should edit `opencv/modules/js/CMakeLists.txt` file to remove `--memory-init-file 0` if running python failed.
+
+## dev
+
+### Build wasm
+
+```
+cd src-wasm; emmake make; cd -;
+```
+
+### Start dev-server
+
+```
+pnpm run dev
 ```
