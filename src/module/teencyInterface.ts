@@ -10,12 +10,12 @@ class TeencyCommunicator {
   constructor(writeSerialPort: WriteSerialPort) {
     this.send = writeSerialPort;
   }
-  public setLaserOutput(output: number) {
+  public setLaserOutput = (output: number) => {
     this.send(`A${Math.floor(output)}`);
-  }
-  public setGalvoPos(coordinate: Coordinate) {
+  };
+  public setGalvoPos = (coordinate: Coordinate) => {
     this.send(`B${Math.floor(coordinate.x)},${Math.floor(coordinate.y)}`);
-  }
+  };
 }
 
 export default TeencyCommunicator;

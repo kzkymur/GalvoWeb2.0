@@ -18,7 +18,7 @@ type Id = string | number;
 const fetchId = (key: string, id?: Id) =>
   id !== undefined ? `${key}-${id}` : key;
 
-export const useGlobalStore = <T = any>(
+export const useGlobalStore = <T>(
   key: string,
   id?: Id,
   initialValue?: T
@@ -45,7 +45,7 @@ export const useGlobalStore = <T = any>(
   return [value, update, del];
 };
 
-export const useStore = <T = any>(
+export const useStore = <T>(
   key: string,
   id?: Id,
   initialValue?: T

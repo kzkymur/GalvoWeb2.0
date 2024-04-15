@@ -1,5 +1,8 @@
 # GalvoWeb2.0
 
+GalvoWeb is serverless software for operating Galvo scanner with XY protocol.
+Your preparation is only a browser (can call Web Serial API) and a teensy 4.0.
+
 ## init
 
 ```

@@ -1,19 +1,9 @@
-import * as math from "mathjs";
 import ModuleWrapper from "@/wasm/wrapper";
 import { WMF32A } from "@/wasm/memory";
 import TeencyCommunicator from "@/module/teencyInterface";
 import { sleep } from ".";
-
-export const arrayToMatrix = (a: number[], column: number): number[][] => {
-  if (a.length % column !== 0) {
-    throw new Error("invalid args");
-  }
-  const m = [];
-  for (let i = 0; i < a.length / column; i++) {
-    m.push(a.slice(i * column, (i + 1) * column));
-  }
-  return m;
-};
+import { affine } from "./math";
+import { renderDot } from "./canvas";
 
 export type Coordinate = {
   x: number;
@@ -119,6 +109,7 @@ export const calcHomography = async (
         30,
         duration
       );
+      await sleep(10);
       teency.setGalvoPos({ x, y });
       const [detect, camera] = await detectResult;
       console.log(detect, camera);
@@ -134,8 +125,6 @@ export const calcHomography = async (
   galvo.data = new Float32Array(galvoArray);
   const camera = new WMF32A(module, galvoArray.length);
   camera.data = new Float32Array(cameraArray);
-  console.log(camera.data);
-  console.log(galvo.data);
   moduleWrapper.calcHomography(
     galvo.pointer,
     camera.pointer,
@@ -157,15 +146,12 @@ export const renderDots = (
     const x = Math.floor(dotsSpanX * i);
     for (let j = 0; j < nDots; j++) {
       const y = Math.floor(dotsSpanY * j);
-      const posArray = [x, y, 1];
-      const h = math.multiply(arrayToMatrix(invHomography, 3), posArray);
-      ctx.fillStyle = `rgba(${(j / nDots) * 255}, ${
-        (i / nDots) * 255
-      }, 255, 1)`;
-      ctx.beginPath();
-      ctx.arc(h[0] / h[2], h[1] / h[2], 8, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.closePath();
+      renderDot(
+        ctx,
+        `rgba(${(j / nDots) * 255}, ${(i / nDots) * 255}, 255, 1)`,
+        affine({ x, y }, invHomography),
+        8
+      );
     }
   }
 };

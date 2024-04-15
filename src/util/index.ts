@@ -7,3 +7,6 @@ export const sleep = (time: number) =>
 export const getRandomInt = (max: number) => {
   return Math.floor(Math.random() * max);
 };
+
+export const cloneInstance = <T>(instance: T) =>
+  Object.assign(Object.create(Object.getPrototypeOf(instance)), instance) as T;

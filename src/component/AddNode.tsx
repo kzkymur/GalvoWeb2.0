@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 import { Button } from "@mui/material";
-import useNodeMap from "@/module/useNodeMap";
+import { useNodeMap } from "@/module/useNode";
 import { NodeList, isNodeKey } from "./Nodes";
 import SelectBox from "./SelectBox";
 
@@ -13,7 +13,7 @@ const Container = styled.div`
   height: 36px;
 
   .MuiOutlinedInput-input {
-    padding: 8.7px;
+    padding: 8.7px !important;
   }
 `;
 

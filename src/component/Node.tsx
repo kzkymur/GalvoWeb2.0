@@ -3,7 +3,7 @@ import { Rnd } from "react-rnd";
 import styled from "styled-components";
 import { useStore } from "@/module/useStore";
 import { getRandomInt } from "@/util";
-import useNodeMap from "@/module/useNodeMap";
+import { useNodeMap } from "@/module/useNode";
 
 export type NodeId = number;
 
@@ -83,7 +83,7 @@ type Props = {
 };
 
 const Node: React.FC<Props> = (props) => {
-  const [_, __, del] = useNodeMap();
+  const [, , del] = useNodeMap();
   const [grid] = useStore<number>(keys.gridUnit, undefined, 10);
   const [latestIndex, updateLatestIndex] = useStore<number>(
     keys.latestIndex,

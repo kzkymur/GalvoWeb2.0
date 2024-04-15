@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo } from "react";
+import styled from "styled-components";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import Item from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import styled from "styled-components";
 
 type Props = {
   onChange: (v: string) => void;
@@ -13,17 +13,13 @@ type Props = {
   label?: string;
   labels?: string[];
   minWidth?: number;
-  width?: number | undefined;
-  height?: number | undefined;
+  maxWidth?: number | undefined;
+  maxHeight?: number | undefined;
 };
 
-const defaultProps: Required<
-  Pick<Props, "minWidth" | "label" | "width" | "height">
-> = {
+const defaultProps: Required<Pick<Props, "minWidth" | "label">> = {
   minWidth: 120,
   label: "",
-  width: -1,
-  height: 32,
 } as const;
 
 const StyledSelect = styled(Select<string>)`
@@ -34,7 +30,7 @@ const StyledSelect = styled(Select<string>)`
 `;
 
 const SelectBox: React.FC<Props> = (recievedProps) => {
-  const props = useMemo<Required<Props>>(
+  const props = useMemo<Props & { labels: string[] }>(
     () => ({
       ...defaultProps,
       labels: recievedProps.values,
@@ -51,9 +47,10 @@ const SelectBox: React.FC<Props> = (recievedProps) => {
   return (
     <Box
       sx={{
+        display: "block",
         minWidth: props.minWidth,
-        width: props.width,
-        height: props.height,
+        maxWidth: props.maxWidth,
+        maxHeight: props.maxHeight,
       }}
     >
       <FormControl fullWidth>

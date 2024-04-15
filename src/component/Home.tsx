@@ -5,20 +5,21 @@ import "./Home.css";
 import { NodeField } from "./Node";
 import { Nodes } from "./Nodes";
 import { SetWasmModule } from "@/store/ctx/action";
-import useNodeMap from "@/module/useNodeMap";
-import AddNode from "./AddNode";
+import { useNodeMap } from "@/module/useNode";
+import Header from "./Header";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch();
   const [nodeMap] = useNodeMap();
+  console.log(nodeMap);
   useEffect(() => {
-    Wasm().then((Module: any) => {
+    Wasm().then((Module: EmscriptenModule) => {
       dispatch(SetWasmModule(Module));
     });
   }, []);
   return (
     <NodeField>
-      <AddNode />
+      <Header />
       {Object.keys(nodeMap).map((id) => (
         <Nodes id={Number(id)} nodeKey={nodeMap[Number(id)]} key={id} />
       ))}

@@ -115,7 +115,7 @@ const StoreListenerController = () => {
   const rootListener = ({ detail }: { detail: string }) => {
     listners.forEach(({ key, callback }) => {
       if (key !== detail) return;
-      let value = get(key);
+      const value = get(key);
       if (value === null) return;
       callback(value);
     });

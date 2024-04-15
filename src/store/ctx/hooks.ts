@@ -48,9 +48,8 @@ export const useSerialIds = (): SerialId[] => {
 export const useWriteSerial = (id: SerialId): WriteSerialPort | null => {
   const serials = useSelector((s: RootState) => s.ctx.writeSerials);
   const writeSerial = useMemo(() => {
-    const writeSerial = serials[id];
-    if (writeSerial !== undefined) {
-      return writeSerial;
+    if (serials[id] !== undefined) {
+      return serials[id];
     } else return null;
   }, [serials, id]);
   return writeSerial;

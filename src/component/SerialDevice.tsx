@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import { Button } from "@mui/material";
@@ -53,15 +53,18 @@ const SerialDevice: React.FC<Props> = (props) => {
       // do nothing
     }
   }, []);
-  const sendMessage = useCallback(
-    async (text: string) => {
-      if (port === null || port.writable === null) return false;
-      const encoder = new TextEncoder();
-      const writer = port.writable.getWriter();
-      await writer.write(encoder.encode(text + "\n"));
-      writer.releaseLock();
-      return true;
-    },
+  const sendMessage = useMemo(
+    () =>
+      port === null || port.writable === null
+        ? undefined
+        : async (text: string) => {
+            if (port === null || port.writable === null) return false;
+            const encoder = new TextEncoder();
+            const writer = port.writable.getWriter();
+            await writer.write(encoder.encode(text + "\n"));
+            writer.releaseLock();
+            return true;
+          },
     [port]
   );
   useEffect(() => {
@@ -81,7 +84,7 @@ const SerialDevice: React.FC<Props> = (props) => {
           onChange={changeBaudRate}
           value={String(baudRate)}
           values={baudRateList.map(String)}
-          width={120}
+          maxWidth={120}
           label="baud rate"
         />
         <Button variant="contained" onClick={connect}>

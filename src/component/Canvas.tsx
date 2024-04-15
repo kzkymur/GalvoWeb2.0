@@ -9,9 +9,11 @@ import { CanvasId } from "@/store/ctx";
 import ResolutionSelector, { useResolution } from "./ResolutionSelector";
 import { Checkbox } from "@mui/material";
 import { useStore } from "@/module/useStore";
+import { Coordinate } from "@/util/calcHomography";
 
 type Props = {
   id: CanvasId;
+  onClick?: (cordinate: Coordinate) => void;
 };
 
 const Container = styled.div<{
@@ -67,7 +69,20 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const onVisibleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setIsVisible(Boolean(e.target.checked));
-    }, [setIsVisible]);
+    },
+    [setIsVisible]
+  );
+
+  const onCilck = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (props.onClick === undefined || canvasRef.current === null) return;
+      const cr = canvasRef.current.getBoundingClientRect();
+      const x = Math.ceil((e.pageX - cr.left) / (cr.width / resolution.w));
+      const y = Math.ceil((e.pageY - cr.top) / (cr.height / resolution.h));
+      props.onClick({ x, y });
+    },
+    [props.onClick, resolution]
+  );
 
   useEffect(() => {
     if (ctx !== null) {
@@ -87,6 +102,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         $isVisible={isVisible || false}
         width={resolution.w}
         height={resolution.h}
+        onClick={onCilck}
       />
       <CheckboxContainer>
         <Checkbox defaultChecked onChange={onVisibleChange} />

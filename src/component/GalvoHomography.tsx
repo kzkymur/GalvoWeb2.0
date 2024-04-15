@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { styled } from "styled-components";
 import * as math from "mathjs";
 import { Button, Slider } from "@mui/material";
@@ -13,14 +13,11 @@ import {
 import CanvasComponent from "./Canvas";
 import { useResolution } from "./ResolutionSelector";
 import CanavsIdSelector from "./CanvasIdSelector";
-import {
-  arrayToMatrix,
-  calcHomography,
-  renderDots,
-} from "@/util/calcHomography";
+import { Coordinate, calcHomography, renderDots } from "@/util/calcHomography";
 import TeencyCommunicator from "@/module/teencyInterface";
 import SelectBox from "./SelectBox";
 import useFpsOptimization from "@/module/useFpsOptimization";
+import { affine, arrayToMatrix } from "@/util/math";
 
 export type Props = {
   id: CanvasId;
@@ -35,7 +32,7 @@ const PanelFooter = styled.div`
   justify-content: space-between;
 `;
 
-const keys = {
+export const keys = {
   nDots: "nDots",
   colorThreshold: "colorThreshold",
   durationBetweenShots: "durationBetweenShots",
@@ -81,13 +78,18 @@ const GalvoHomography: React.FC<Props> = (props) => {
   const serialIds = useSerialIds();
   const [serialId, setSerialId] = useStore<number>(keys.serialId, props.id);
   const writeSerialPort = useWriteSerial(serialId || 0);
-  const [, setHomography] = useStore<number[]>(
+  const teency = useMemo(
+    () =>
+      writeSerialPort !== null ? new TeencyCommunicator(writeSerialPort) : null,
+    [writeSerialPort]
+  );
+  const [homography, setHomography] = useStore<number[]>(
     keys.homography,
-    originalCanvasId || 0
+    props.id || 0
   );
   const [invHomography, setInvHomography] = useStore<number[]>(
     keys.invHomography,
-    originalCanvasId || 0
+    props.id || 0
   );
 
   const orgCtx = useCtx(originalCanvasId as CanvasId);
@@ -97,7 +99,7 @@ const GalvoHomography: React.FC<Props> = (props) => {
       nDots === null ||
       duration === null ||
       colorThreshold === null ||
-      writeSerialPort === null ||
+      teency === null ||
       module === null ||
       orgCtx === null
     )
@@ -106,7 +108,7 @@ const GalvoHomography: React.FC<Props> = (props) => {
     const homography = await calcHomography(
       module,
       orgCtx,
-      new TeencyCommunicator(writeSerialPort),
+      teency,
       nDots,
       colorThreshold,
       duration
@@ -116,7 +118,15 @@ const GalvoHomography: React.FC<Props> = (props) => {
     setHomography(h);
     setInvHomography(math.inv(arrayToMatrix(h, 3)).flat());
     homography.clear();
-  }, [orgCtx, module, writeSerialPort, nDots, duration, resolution]);
+  }, [orgCtx, module, teency, nDots, duration, resolution]);
+
+  const shotDot = useCallback(
+    (p: Coordinate) => {
+      if (teency === null || homography === null) return;
+      teency.setGalvoPos(affine(p, homography));
+    },
+    [teency, homography]
+  );
 
   const renderCopy = useCallback(() => {
     if (ctx === null || orgCtx === null) return;
@@ -130,6 +140,7 @@ const GalvoHomography: React.FC<Props> = (props) => {
     if (ctx === null || invHomography === null || nDots === null) return;
     renderDots(ctx, invHomography, nDots);
   }, [ctx, invHomography, nDots]);
+
   const render = useCallback(() => {
     if (ctx === null) return;
     ctx.reset();
@@ -207,7 +218,7 @@ const GalvoHomography: React.FC<Props> = (props) => {
           </Button>
         </PanelFooter>
       </PanelContainer>
-      <CanvasComponent id={props.id} />
+      <CanvasComponent id={props.id} onClick={shotDot} />
     </div>
   );
 };

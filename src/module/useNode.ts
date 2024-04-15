@@ -1,6 +1,6 @@
 import { NodeKey } from "@/component/Nodes";
 import { useStore } from "./useStore";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { NodeId } from "@/component/Node";
 
 type NodeMap = Record<NodeId, NodeKey>;
@@ -8,7 +8,7 @@ type NodeMap = Record<NodeId, NodeKey>;
 const nodeMapKey = "node-map";
 const latestNodeIdKey = "latest-node-id";
 
-const useNodeMap = (): [
+export const useNodeMap = (): [
   NodeMap,
   (n: NodeKey) => void,
   (id: NodeId) => void
@@ -43,4 +43,22 @@ const useNodeMap = (): [
   return [nodeMap!, add, del];
 };
 
-export default useNodeMap;
+export const useNodeIds = (targetNodeKeys?: NodeKey[]): NodeId[] => {
+  const [nodeMap] = useStore<NodeMap>(nodeMapKey, undefined, {});
+  const targetNodeIds = useMemo<number[]>(
+    () =>
+      nodeMap !== null
+        ? (Object.entries(nodeMap)
+            .map(([id, key]) =>
+              targetNodeKeys === undefined
+                ? Number(id)
+                : targetNodeKeys.includes(key)
+                ? Number(id)
+                : undefined
+            )
+            .filter((v) => v !== undefined) as number[])
+        : [],
+    [targetNodeKeys, nodeMap]
+  );
+  return targetNodeIds;
+};
