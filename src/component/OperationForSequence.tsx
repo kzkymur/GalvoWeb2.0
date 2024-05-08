@@ -39,7 +39,7 @@ const OperationForSequence: React.FC<Props> = (props) => {
           <Name>{operation.type}</Name>
         </TableCell>
         <TableCell align="right">
-            <span>{operation.time} ms</span>
+          <span>{operation.time} ms</span>
         </TableCell>
         <TableCell align="center">
           <Button variant="contained" onClick={onClick}>

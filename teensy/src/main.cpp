@@ -4,8 +4,6 @@
 
 #define PWM_OUT_PIN (5)
 #define GALVO_ENABLE_PIN (3)
-#define ADJ1_IN_PIN (20)
-#define ADJ2_IN_PIN (21)
 #define I2C_DAC_ADDR (0x60) // 0b1100000 (7bit address)
 
 //! ガルバノスキャナ
@@ -13,22 +11,16 @@ XY2_100* galvo;
 
 String buffer = "";
 char mode;
-uint16_t x, y, vol;
+int x, y, vol;
 
 void setup() {
-    // USBシリアル（On board）
-    Serial.begin(9600);
-
-    // USBシリアル（Extra）
-    // Serial2.begin(115200);
+    Serial.begin(115200);
+    Serial.setTimeout(5);
+    pinMode(13, OUTPUT);
 
     // レーザー制御用PWM出力
     pinMode(PWM_OUT_PIN, OUTPUT);
     analogWriteResolution(12);
-
-    // デバッグ調整用ボリューム
-    pinMode(ADJ1_IN_PIN, INPUT);
-    pinMode(ADJ2_IN_PIN, INPUT);
 
     // I2C（DAC用）
     Wire.begin();
@@ -42,13 +34,9 @@ void setup() {
     pinMode(GALVO_ENABLE_PIN, OUTPUT);
     galvo = new XY2_100();
     galvo->begin();
-
-    Serial.printf("Teensy 4 Galvo Control\n");
-    // Serial2.printf("Teensy 4 Galvo Control\n");
 }
 
 void loop() {
-
     if (Serial.available()) {
         buffer = Serial.readString();
         mode = buffer.charAt(0);
@@ -71,7 +59,8 @@ void loop() {
         Wire.write(duty);
         Wire.endTransmission();
 
-    } else if (mode == 'B') {
+    }
+    if (mode == 'B') {
         // ガルバノスキャナ制御
         digitalWrite(GALVO_ENABLE_PIN, 1);
         int result = sscanf(buffer.c_str(), "%d,%d", &x, &y);

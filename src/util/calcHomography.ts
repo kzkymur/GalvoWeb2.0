@@ -10,9 +10,9 @@ export type Coordinate = {
   y: number;
 };
 
-const GALVO_MAX_X = 65536;
+const GALVO_MAX_X = 65535;
 const GALVO_MIN_X = 0;
-const GALVO_MAX_Y = 65536;
+const GALVO_MAX_Y = 65535;
 const GALVO_MIN_Y = 0;
 
 const detectWhitePixels = (

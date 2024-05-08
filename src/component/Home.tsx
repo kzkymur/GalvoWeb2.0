@@ -11,7 +11,6 @@ import Header from "./Header";
 const Home: React.FC = () => {
   const dispatch = useDispatch();
   const [nodeMap] = useNodeMap();
-  console.log(nodeMap);
   useEffect(() => {
     Wasm().then((Module: EmscriptenModule) => {
       dispatch(SetWasmModule(Module));

@@ -27,7 +27,6 @@ const hue2rgb = (p: number, q: number, t: number) => {
   return p;
 };
 
-
-export const RGB2RGBA = (rgb : string, a: number) => {
+export const RGB2RGBA = (rgb: string, a: number) => {
   return `rgba(${rgb.match(/rgb\(((\d*|,)+)\)/)![1]},${a})`;
 };

@@ -14,6 +14,7 @@ class TeencyCommunicator {
     this.send(`A${Math.floor(output)}`);
   };
   public setGalvoPos = (coordinate: Coordinate) => {
+    console.log(coordinate);
     this.send(`B${Math.floor(coordinate.x)},${Math.floor(coordinate.y)}`);
   };
 }
