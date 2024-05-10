@@ -1,4 +1,4 @@
-# Teensy
+# Teensy Setup
 This is for teensy4.0 operating galvoScanners & lasers.
 
 ## How to use
