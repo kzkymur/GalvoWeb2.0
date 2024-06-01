@@ -47,13 +47,13 @@ const CalibratedCamera: React.FC<Props> = (props) => {
   );
   const [isCalibratingNow, setIsCalibratingNow] = useState(false);
   const updateNImages = useCallback(
-    (_: any, value: number | number[]) => {
+    (_: unknown, value: number | number[]) => {
       setNImages(typeof value === "object" ? value[0] : value);
     },
     [setNImages]
   );
   const updateDuration = useCallback(
-    (_: any, value: number | number[]) => {
+    (_: unknown, value: number | number[]) => {
       setDuration(typeof value === "object" ? value[0] : value);
     },
     [setDuration]

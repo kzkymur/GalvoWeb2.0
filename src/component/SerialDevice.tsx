@@ -3,7 +3,8 @@ import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import { Button } from "@mui/material";
 import { SetSendMsgSp } from "@/store/ctx/action";
-import { useStore } from "@/module/useStore";
+import StorageJs from "@kzkymur/storage";
+import { useStorageUnique } from "@kzkymur/storage/react";
 import { NodeId } from "./Node";
 import SelectBox from "./SelectBox";
 
@@ -16,10 +17,6 @@ const baudRateList = [
   128000, 256000,
 ] as const;
 
-const keys = {
-  baudRate: "baudRate",
-} as const;
-
 const StatusSentence = styled.span`
   padding: 16px 4px;
   display: block;
@@ -30,10 +27,19 @@ const Footer = styled.div`
   justify-content: space-between;
 `;
 
+const storage = new StorageJs({
+  name: "serial-device",
+  storage: window.localStorage,
+});
+if (storage.get("baudRate").length === 0) storage.set({}, "baudRate");
+
 const SerialDevice: React.FC<Props> = (props) => {
   const dispatch = useDispatch();
   const [port, setPort] = useState<null | SerialPort>(null);
-  const [baudRate, setBaudRate] = useStore<number>(keys.baudRate, props.id);
+  const [baudRate, setBaudRate] = useStorageUnique<number>(
+    storage,
+    `baudRate-id:${props.id}`
+  );
   const changeBaudRate = useCallback(
     (v: string) => {
       setBaudRate(Number(v));

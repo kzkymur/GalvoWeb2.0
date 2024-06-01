@@ -59,7 +59,9 @@ export const playCameraMovie = async (
   });
   try {
     await video.play();
-  } catch {}
+  } catch {
+    // do nothing
+  }
   setResolution({ w: video.videoWidth, h: video.videoHeight });
 };
 
